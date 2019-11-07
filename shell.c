@@ -4,37 +4,43 @@
 #include <stdio.h>
 #include <string.h>
 
-#define  MAX_COMMAND_LENGTH 64
+#define BUFFER_LEN 1024
 
-char* getNextCommand(char const *argv[], int* startpoint);
+int main(){
+  char line[BUFFER_LEN];
+  char* argv[100];
 
-int main(int argc, char const *argv[])
-{
-    int iterator_arg;
+  while(1){
+    printf("> ");
+    if(!fgets(line, BUFFER_LEN, stdin)){  //get command and put it in line
+      break;                                //if user hits CTRL+D break
+    }
+    size_t length = strlen(line);
+    if (line[length - 1] == '\n')
+      line[length - 1] = '\0';
+
+    char *token;                  //split command into separate strings
+    token = strtok(line, " ");
+    int i = 0;
+    while(token != 0 && i < 100){
+      argv[i] = token;
+      token = strtok(0," ");
+      i++;
+    }
+    argv[i] = 0;
+
+    int pid = fork();
     int status;
-    if(fork() != 0) {
-      //printf("Hallo i bims parent\n");
-      //printf("%d\n", getpid());   // Prints pid from parent ; just checking
-      waitpid(-1, &status, 0);    // waits for all childs (-1) to properly end program
+    if(pid != 0)
+    {
+      //Parent
+      waitpid(-1, &status, 0);
     }
-    else {
-      //printf("Hallo i bims child\n");
-      //printf("%d\n", getpid()); // Prints pid from child ; just checking
-      getNextCommand(argv, 0);
+    else
+    {
+      //Child
+      execvp(argv[0],argv);
+      printf("Child process could not do execvp\n");
     }
-    return 0;
-}
-
-char* getNextCommand(char const *argv[], int* startpoint)
-{
-  int i = startpoint;
-  int current_command_iterator = 0;
-  char current_command[MAX_COMMAND_LENGTH];
-  while (argv[i] == '\0' || argv[i] != '&') {
-    current_command[current_command_iterator] += argv[i];
-    i++;
-    current_command_iterator++;
   }
-  //printf("%s\n", current_command);
-  return current_command;
 }
