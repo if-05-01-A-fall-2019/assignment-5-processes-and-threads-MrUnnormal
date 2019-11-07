@@ -28,24 +28,40 @@ package at.htlleonding.fibonacci;
  * @author P. Bauer <p.bauer@htl-leonding.ac.at>
  */
 public class Fibonacci {
+    static int n;
+    static public int result;
 
+    public Fibonacci(int n)  {
+        this.n = n;
+    }
+    
     static int getNumberSingle(int n) {
         if (n < 2)
             return 1;
         else
             return getNumberSingle(n - 1) + getNumberSingle(n - 2);
     }
-
-    static int getNumberParallel(int n) {
-        Thread t1 = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                
-            }
-            
-        });
-        return 1;
-    }
     
+    static int getNumberParallel(int num) { // ???
+	// While building throws weird error -> could not verify
+       if(num < 2) {
+           return 1;
+       }
+       Fibonnaci_Runnable runnable1 = new Fibonnaci_Runnable(num - 1);
+       Fibonnaci_Runnable runnable2 = new Fibonnaci_Runnable(num - 2);
+       Thread thread1 = new Thread(runnable1);
+       Thread thread2 = new Thread(runnable2);
+       thread1.start();
+       thread2.start();
+       try {
+           thread1.join();
+           thread2.join();
+       }
+       catch (Exception e) {
+           System.out.println("Error occured: " + e.getMessage());
+       }
+       return runnable1.result + runnable2.result;
+    }
 }
+
+
